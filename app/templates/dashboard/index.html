@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h2 mt-3">Dashboard</h1>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Devices</h5>
+                <p class="card-text display-6">{{ total_devices }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Backups Today</h5>
+                <p class="card-text display-6">{{ backup_today }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-danger mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Failed Today</h5>
+                <p class="card-text display-6">{{ failed_today }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Alerts</h5>
+                <p class="card-text display-6">{{ unread_alerts }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">Backup Status Summary</div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-3"><span class="badge bg-success fs-5">Success</span> <span class="fs-5">{{ success_count }}</span></div>
+                    <div class="col-3"><span class="badge bg-danger fs-5">Failed</span> <span class="fs-5">{{ failed_count }}</span></div>
+                    <div class="col-3"><span class="badge bg-primary fs-5">Running</span> <span class="fs-5">{{ running_count }}</span></div>
+                    <div class="col-3"><span class="badge bg-warning fs-5">Warning</span> <span class="fs-5">{{ warning_count }}</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Backup Trend (Last 7 Days)</div>
+            <div class="card-body">
+                <canvas id="trendChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Recent Backups</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                {% for history in recent_histories %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ history.job.job_name }}
+                    <span class="badge bg-{{ 'success' if history.status == 'SUCCESS' else 'danger' if history.status == 'FAILED' else 'warning' if history.status == 'WARNING' else 'primary' }}">{{ history.status }}</span>
+                </li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ dates|safe }},
+            datasets: [
+                {
+                    label: 'Success',
+                    data: {{ success_counts|safe }},
+                    borderColor: 'green',
+                    fill: false,
+                },
+                {
+                    label: 'Failed',
+                    data: {{ failed_counts|safe }},
+                    borderColor: 'red',
+                    fill: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mt-3">Alerts</h2>
+<form method="POST" action="{{ url_for('alerts.mark_all_read') }}" class="mb-3">
+    <button type="submit" class="btn btn-secondary">Mark All as Read</button>
+</form>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Message</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for alert in alerts.items %}
+        <tr class="{{ 'table-light' if alert.is_read else 'table-warning' }}">
+            <td>{{ alert.id }}</td>
+            <td>{{ alert.title }}</td>
+            <td>{{ alert.message or '-' }}</td>
+            <td>{{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ 'Read' if alert.is_read else 'Unread' }}</td>
+            <td>
+                {% if not alert.is_read %}
+                <button class="btn btn-sm btn-outline-primary mark-read" data-id="{{ alert.id }}">Mark Read</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<nav>
+    <ul class="pagination">
+        {% for page in alerts.iter_pages() %}
+            <li class="page-item {{ 'active' if page == alerts.page else '' }}"><a class="page-link" href="{{ url_for('alerts.index', page=page) }}">{{ page }}</a></li>
+        {% endfor %}
+    </ul>
+</nav>
+<script>
+    document.querySelectorAll('.mark-read').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            fetch(`/alerts/${id}/mark-read`, { method: 'POST' })
+            .then(res => res.json())
+            .then(() => location.reload());
+        });
+    });
+</script>
+{% endblock %}

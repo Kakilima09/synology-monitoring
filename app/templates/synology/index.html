@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <h2>Synology Devices</h2>
+    <a href="{{ url_for('synology.create') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add Device</a>
+</div>
+<table class="table table-striped table-hover mt-3">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Host</th>
+            <th>Port</th>
+            <th>Protocol</th>
+            <th>Username</th>
+            <th>Status</th>
+            <th>Last Sync</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for device in devices %}
+        <tr>
+            <td>{{ device.name }}</td>
+            <td>{{ device.host }}</td>
+            <td>{{ device.port }}</td>
+            <td>{{ device.protocol.upper() }}</td>
+            <td>{{ device.username }}</td>
+            <td>
+                <span class="badge bg-{{ 'success' if device.last_status == 'ONLINE' else 'danger' if device.last_status == 'ERROR' else 'secondary' }}">
+                    {{ device.last_status or 'UNKNOWN' }}
+                </span>
+            </td>
+            <td>{{ device.last_sync_at.strftime('%Y-%m-%d %H:%M') if device.last_sync_at else 'Never' }}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary test-conn" data-id="{{ device.id }}">Test</button>
+                <button class="btn btn-sm btn-outline-success sync-now" data-id="{{ device.id }}">Sync</button>
+                <a href="{{ url_for('synology.edit', id=device.id) }}" class="btn btn-sm btn-outline-warning">Edit</a>
+                <form method="POST" action="{{ url_for('synology.delete', id=device.id) }}" style="display:inline;" onsubmit="return confirm('Delete this device?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    document.querySelectorAll('.test-conn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            fetch(`/synology/${id}/test`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.success ? 'Connection OK' : 'Connection Failed: ' + data.message);
+            });
+        });
+    });
+    document.querySelectorAll('.sync-now').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('Start sync now?')) return;
+            const id = this.dataset.id;
+            fetch(`/synology/${id}/sync`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                alert('Sync completed: ' + JSON.stringify(data));
+                location.reload();
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mt-3">User Management</h2>
+<a href="{{ url_for('users.create') }}" class="btn btn-primary mb-3">Add User</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Active</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ 'Yes' if user.is_active else 'No' }}</td>
+            <td>
+                <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                {% if user.id != current_user.id %}
+                <form method="POST" action="{{ url_for('users.delete', id=user.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure?')">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

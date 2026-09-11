@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mt-3">Edit Synology Device</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form.host.label(class="form-label") }}
+            {{ form.host(class="form-control", placeholder="contoh: ivpsyn.synology.me (tanpa http/https)") }}
+            <small class="text-muted">Masukkan hostname atau IP saja, tanpa protokol.</small>
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.port.label(class="form-label") }}
+            {{ form.port(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.protocol.label(class="form-label") }}
+            {{ form.protocol(class="form-select") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control") }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", placeholder="Kosongkan jika tidak diubah") }}
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="form-check">
+                {{ form.verify_ssl(class="form-check-input") }}
+                {{ form.verify_ssl.label(class="form-check-label") }}
+            </div>
+        </div>
+        <div class="col-12 mb-3">
+            <div class="form-check">
+                {{ form.is_active(class="form-check-input") }}
+                {{ form.is_active.label(class="form-check-label") }}
+            </div>
+        </div>
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+    <a href="{{ url_for('synology.index') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

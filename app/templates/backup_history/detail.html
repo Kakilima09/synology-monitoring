@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mt-3">Backup Detail</h2>
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Job</dt>
+            <dd class="col-sm-9">{{ history.job.job_name }}</dd>
+            <dt class="col-sm-3">Synology</dt>
+            <dd class="col-sm-9">{{ history.device.name }}</dd>
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9"><span class="badge bg-{{ 'success' if history.status == 'SUCCESS' else 'danger' if history.status == 'FAILED' else 'warning' if history.status == 'WARNING' else 'primary' if history.status == 'RUNNING' else 'secondary' }}">{{ history.status }}</span></dd>
+            <dt class="col-sm-3">Started</dt>
+            <dd class="col-sm-9">{{ history.started_at.strftime('%Y-%m-%d %H:%M:%S') if history.started_at else '' }}</dd>
+            <dt class="col-sm-3">Finished</dt>
+            <dd class="col-sm-9">{{ history.finished_at.strftime('%Y-%m-%d %H:%M:%S') if history.finished_at else '' }}</dd>
+            <dt class="col-sm-3">Duration</dt>
+            <dd class="col-sm-9">{{ history.duration_seconds|round(1) if history.duration_seconds else '-' }} seconds</dd>
+            <dt class="col-sm-3">Backup Size</dt>
+            <dd class="col-sm-9">{% if history.backup_size %}{{ (history.backup_size / 1024**3)|round(2) }} GB{% else %}-{% endif %}</dd>
+            <dt class="col-sm-3">File Count</dt>
+            <dd class="col-sm-9">{{ history.file_count or '-' }}</dd>
+            <dt class="col-sm-3">Source</dt>
+            <dd class="col-sm-9">{{ history.source or '-' }}</dd>
+            <dt class="col-sm-3">Destination</dt>
+            <dd class="col-sm-9">{{ history.destination or '-' }}</dd>
+            <dt class="col-sm-3">Error Message</dt>
+            <dd class="col-sm-9 text-danger">{{ history.error_message or '-' }}</dd>
+        </dl>
+    </div>
+</div>
+<a href="{{ url_for('backup_history.index') }}" class="btn btn-secondary mt-3">Back to History</a>
+{% endblock %}
