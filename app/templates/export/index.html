@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4" style="max-width: 900px;">
+    <div class="page-head">
+        <div>
+            <h1 class="page-title"><i class="bi bi-download me-2"></i>Ekspor Log</h1>
+            <div class="page-sub">Unduh log backup atau log aktivitas Drive dalam format CSV.</div>
+        </div>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary btn-round btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    <div class="card-dash">
+        <div class="card-body p-4">
+            <form method="get" action="{{ url_for('export_logs.download') }}" id="exportForm">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Jenis Log</label>
+                        <select class="form-select" name="type" id="logType">
+                            <option value="drive">Log Drive</option>
+                            <option value="backup">Log Backup</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Dari Tanggal</label>
+                        <input type="date" class="form-control" name="date_from">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Sampai Tanggal</label>
+                        <input type="date" class="form-control" name="date_to">
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-round">
+                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Unduh CSV
+                    </button>
+                    <span class="small text-muted align-self-center" id="fileHint"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card-dash mt-3">
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="kpi-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);width:42px;height:42px;font-size:1.1rem;"><i class="bi bi-journal-text"></i></div>
+                        <div>
+                            <div class="fw-bold">Log Drive</div>
+                            <div class="small text-muted">event_time, username, activity_type, device_name, ip_address, source_path, target_path</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);width:42px;height:42px;font-size:1.1rem;"><i class="bi bi-clipboard-check-fill"></i></div>
+                        <div>
+                            <div class="fw-bold">Log Backup</div>
+                            <div class="small text-muted">device, job, status, started_at, finished_at, size_bytes, files_count, message</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const logTypeEl = document.getElementById('logType');
+const fileHint = document.getElementById('fileHint');
+function updateHint() {
+    const names = { drive: 'log-drive-YYYYMMDD-HHMM.csv', backup: 'log-backup-YYYYMMDD-HHMM.csv' };
+    fileHint.textContent = 'File contoh: ' + names[logTypeEl.value];
+}
+logTypeEl.addEventListener('change', updateHint);
+updateHint();
+</script>
+{% endblock %}

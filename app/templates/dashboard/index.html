@@ -1,109 +1,343 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="h2 mt-3">Dashboard</h1>
+<div class="container-fluid px-3 px-lg-4 py-4">
 
-<div class="row mt-4">
-    <div class="col-md-3">
-        <div class="card text-bg-primary mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Total Devices</h5>
-                <p class="card-text display-6">{{ total_devices }}</p>
-            </div>
+    <div class="page-head">
+        <div>
+            <h1 class="page-title"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h1>
+            <div class="page-sub">Status perangkat, backup, dan aktivitas Synology Drive secara ringkas.</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('drive_dashboard.index') }}" class="btn btn-primary btn-round btn-sm">
+                <i class="bi bi-arrow-repeat me-1"></i> Sync Sekarang
+            </a>
+            <a href="{{ url_for('export_logs.index') }}" class="btn btn-outline-secondary btn-round btn-sm">
+                <i class="bi bi-download me-1"></i> Ekspor Log
+            </a>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-bg-success mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Backups Today</h5>
-                <p class="card-text display-6">{{ backup_today }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-bg-danger mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Failed Today</h5>
-                <p class="card-text display-6">{{ failed_today }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-bg-warning mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Alerts</h5>
-                <p class="card-text display-6">{{ unread_alerts }}</p>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">Backup Status Summary</div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-3"><span class="badge bg-success fs-5">Success</span> <span class="fs-5">{{ success_count }}</span></div>
-                    <div class="col-3"><span class="badge bg-danger fs-5">Failed</span> <span class="fs-5">{{ failed_count }}</span></div>
-                    <div class="col-3"><span class="badge bg-primary fs-5">Running</span> <span class="fs-5">{{ running_count }}</span></div>
-                    <div class="col-3"><span class="badge bg-warning fs-5">Warning</span> <span class="fs-5">{{ warning_count }}</span></div>
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="card-dash h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);"><i class="bi bi-hdd-network-fill"></i></div>
+                    <div>
+                        <div class="kpi-value">{{ online_devices }}<span class="fs-6 text-muted fw-normal"> / {{ total_devices }}</span></div>
+                        <div class="kpi-label">Perangkat Online</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card-dash h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="bi bi-clipboard-check-fill"></i></div>
+                    <div>
+                        <div class="kpi-value">{{ total_jobs }}<span class="fs-6 text-muted fw-normal"> / {{ backup_today }} hari ini</span></div>
+                        <div class="kpi-label">Backup</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card-dash h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <div class="kpi-value">{{ total_clients }}<span class="fs-6 text-muted fw-normal"> / {{ online_clients }} online</span></div>
+                        <div class="kpi-label">Drive Client</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card-dash h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316);"><i class="bi bi-journal-text"></i></div>
+                    <div>
+                        <div class="kpi-value">{{ total_logs }}<span class="fs-6 text-muted fw-normal"> / {{ logs_today }} hari ini</span></div>
+                        <div class="kpi-label">Log Drive</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+            <div class="card-dash h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-bar-chart-line-fill me-2 text-primary"></i>Grafik Log Backup (7 Hari)</span>
+                    <span class="badge-soft badge-soft-success"><i class="bi bi-check-circle me-1"></i>{{ success_count }} sukses</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-box"><canvas id="backupChart"></canvas></div>
+                    <div class="d-flex gap-3 mt-2 small text-muted">
+                        <span><i class="bi bi-circle-fill text-success me-1"></i>Sukses: {{ success_count }}</span>
+                        <span><i class="bi bi-circle-fill text-danger me-1"></i>Gagal: {{ failed_count }}</span>
+                        <span><i class="bi bi-circle-fill text-primary me-1"></i>Berjalan: {{ running_count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card-dash h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Aktivitas Drive (7 Hari)</span>
+                    <a href="{{ url_for('drive_logs.index') }}" class="small text-decoration-none">Lihat log</a>
+                </div>
+                <div class="card-body">
+                    <div class="chart-box"><canvas id="driveChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Devices + Alerts -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+            <div class="card-dash">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-hdd-stack-fill me-2 text-primary"></i>Status Perangkat</span>
+                    <a href="{{ url_for('synology.index') }}" class="small text-decoration-none">Kelola</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 table-dash">
+                        <thead><tr><th>Perangkat</th><th>Host</th><th>Status</th><th>Sync Terakhir</th></tr></thead>
+                        <tbody>
+                            {% for device in devices %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ device.name }}</div>
+                                    <small class="text-muted">{{ device.username }}</small>
+                                </td>
+                                <td><small>{{ device.get_clean_host() }}:{{ device.port }}</small></td>
+                                <td>
+                                    {% if device.last_status == 'ONLINE' %}
+                                        <span class="badge-soft badge-soft-success"><i class="bi bi-check-circle me-1"></i>Online</span>
+                                    {% elif device.last_status == 'ERROR' %}
+                                        <span class="badge-soft badge-soft-danger"><i class="bi bi-x-circle me-1"></i>Error</span>
+                                    {% else %}
+                                        <span class="badge-soft badge-soft-secondary">{{ device.last_status or 'Unknown' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if device.last_sync_at %}
+                                        <small>{{ device.last_sync_at.strftime('%d-%m-%Y %H:%M') }}</small>
+                                    {% else %}<small class="text-muted">Belum sync</small>{% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">Belum ada perangkat Synology terdaftar.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card-dash">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-bell-fill me-2 text-primary"></i>Alert Terbaru</span>
+                    <a href="{{ url_for('alerts.index') }}" class="small text-decoration-none">Semua ({{ unread_alerts }})</a>
+                </div>
+                <div class="list-group list-group-flush list-dash">
+                    {% for alert in recent_alerts %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span class="badge-soft badge-soft-{{ 'danger' if alert.type == 'BACKUP_FAILED' else 'warning' }}">{{ alert.type }}</span>
+                            <small class="text-muted">{{ alert.created_at.strftime('%d-%m-%Y %H:%M') if alert.created_at else '' }}</small>
+                        </div>
+                        <div class="mt-1">{{ alert.title }}</div>
+                    </div>
+                    {% else %}
+                    <div class="empty-state py-4"><i class="bi bi-check-circle mb-2"></i>Tidak ada alert.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent backups + drive activity -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+            <div class="card-dash">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-clock-history me-2 text-primary"></i>Backup Terakhir</span>
+                    <a href="{{ url_for('backup_history.index') }}" class="small text-decoration-none">Riwayat</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 table-dash">
+                        <thead><tr><th>Job</th><th>Device</th><th>Status</th><th>Mulai</th><th>Selesai</th></tr></thead>
+                        <tbody>
+                            {% for history in recent_histories %}
+                            <tr>
+                                <td>{{ history.job.job_name }}</td>
+                                <td><small>{{ history.device.name }}</small></td>
+                                <td>
+                                    <span class="badge-soft badge-soft-{{ 'success' if history.status == 'SUCCESS' else 'danger' if history.status == 'FAILED' else 'warning' if history.status == 'WARNING' else 'primary' }}">{{ history.status }}</span>
+                                </td>
+                                <td><small>{{ history.started_at.strftime('%d-%m-%Y %H:%M') if history.started_at else '-' }}</small></td>
+                                <td><small>{{ history.finished_at.strftime('%d-%m-%Y %H:%M') if history.finished_at else '-' }}</small></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">Belum ada riwayat backup.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card-dash">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-activity me-2 text-primary"></i>Aktivitas Drive Terbaru</span>
+                    <a href="{{ url_for('drive_logs.index') }}" class="small text-decoration-none">Semua</a>
+                </div>
+                <div class="list-group list-group-flush list-dash">
+                    {% for log in recent_logs %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ log.activity_type or 'Event' }}</strong>
+                            <small class="text-muted">{{ log.event_time.strftime('%d-%m-%Y %H:%M') if log.event_time else '-' }}</small>
+                        </div>
+                        <div>{{ log.username or 'system' }} &middot; {{ log.ip_address or '-' }}</div>
+                        <small class="text-muted text-break">{{ log.source_path or log.device_name or '-' }}</small>
+                    </div>
+                    {% else %}
+                    <div class="empty-state py-4"><i class="bi bi-inbox mb-2"></i>Belum ada log aktivitas.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent clients + syncs -->
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card-dash">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-laptop-fill me-2 text-primary"></i>Drive Client Terbaru</span>
+                    <a href="{{ url_for('drive_clients.index') }}" class="small text-decoration-none">Semua ({{ total_clients }})</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 table-dash">
+                        <thead><tr><th>Client</th><th>Nama</th><th>IP</th><th>Status</th><th>Auth Terakhir</th></tr></thead>
+                        <tbody>
+                            {% for client in recent_clients %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ client.client_id }}</div>
+                                    <small class="text-muted">{{ client.client_type or '-' }}</small>
+                                </td>
+                                <td>{{ client.client_name or '-' }}</td>
+                                <td><small>{{ client.client_ip or '-' }}</small></td>
+                                <td>
+                                    {% if client.client_status == 'on_line' %}
+                                        <span class="badge-soft badge-soft-success">Online</span>
+                                    {% elif client.client_status == 'syncing' %}
+                                        <span class="badge-soft badge-soft-warning">Syncing</span>
+                                    {% elif client.client_status == 'off_line' %}
+                                        <span class="badge-soft badge-soft-secondary">Offline</span>
+                                    {% else %}
+                                        <span class="badge-soft badge-soft-secondary">{{ client.client_status or '-' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if client.last_seen_at %}
+                                        <small>{{ client.last_seen_at.strftime('%d-%m-%Y %H:%M') }}</small>
+                                    {% else %}-{% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">Belum ada client ter-sync.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card-dash">
+                <div class="card-header"><span><i class="bi bi-arrow-repeat me-2 text-primary"></i>Aktivitas Sync Terakhir</span></div>
+                <div class="list-group list-group-flush list-dash">
+                    {% for sync in recent_syncs %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">{{ sync.device.name if sync.device else 'Semua' }}</div>
+                            <small class="text-muted">
+                                {{ sync.started_at.strftime('%d-%m-%Y %H:%M') if sync.started_at else '-' }}
+                                {% if sync.records_created %} &middot; +{{ sync.records_created }} baru {% endif %}
+                                {% if sync.records_updated %} &middot; {{ sync.records_updated }} update {% endif %}
+                            </small>
+                        </div>
+                        {% if sync.status == 'SUCCESS' %}
+                            <span class="badge-soft badge-soft-success">Sukses</span>
+                        {% elif sync.status == 'FAILED' %}
+                            <span class="badge-soft badge-soft-danger" title="{{ sync.error_message or '' }}">Gagal</span>
+                        {% else %}
+                            <span class="badge-soft badge-soft-primary">{{ sync.status }}</span>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state py-4"><i class="bi bi-clock mb-2"></i>Belum ada aktivitas sync.</div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<div class="row mt-4">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">Backup Trend (Last 7 Days)</div>
-            <div class="card-body">
-                <canvas id="trendChart" width="400" height="200"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">Recent Backups</div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                {% for history in recent_histories %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ history.job.job_name }}
-                    <span class="badge bg-{{ 'success' if history.status == 'SUCCESS' else 'danger' if history.status == 'FAILED' else 'warning' if history.status == 'WARNING' else 'primary' }}">{{ history.status }}</span>
-                </li>
-                {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
+{% block scripts %}
 <script>
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ dates|safe }},
-            datasets: [
-                {
-                    label: 'Success',
-                    data: {{ success_counts|safe }},
-                    borderColor: 'green',
-                    fill: false,
-                },
-                {
-                    label: 'Failed',
-                    data: {{ failed_counts|safe }},
-                    borderColor: 'red',
-                    fill: false,
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-        }
-    });
+const backupDates = {{ dates | tojson }};
+const backupSuccess = {{ success_counts | tojson }};
+const backupFailed = {{ failed_counts | tojson }};
+const driveDates = {{ drive_dates | tojson }};
+const driveLogs = {{ drive_log_counts | tojson }};
+
+new Chart(document.getElementById('backupChart'), {
+    type: 'bar',
+    data: {
+        labels: backupDates,
+        datasets: [
+            { label: 'Sukses', data: backupSuccess, backgroundColor: 'rgba(16,185,129,.8)', borderRadius: 8 },
+            { label: 'Gagal', data: backupFailed, backgroundColor: 'rgba(239,68,68,.8)', borderRadius: 8 }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(148,163,184,.15)' } }, x: { grid: { display: false } } }
+    }
+});
+
+new Chart(document.getElementById('driveChart'), {
+    type: 'line',
+    data: {
+        labels: driveDates,
+        datasets: [{
+            label: 'Jumlah Log',
+            data: driveLogs,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,.12)',
+            fill: true,
+            tension: .4,
+            pointRadius: 3,
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(148,163,184,.15)' } }, x: { grid: { display: false } } }
+    }
+});
 </script>
 {% endblock %}

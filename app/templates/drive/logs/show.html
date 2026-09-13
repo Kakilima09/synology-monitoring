@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-3">
+  <a href="{{ url_for('drive_logs.index') }}" class="btn btn-sm btn-outline-secondary mb-3">← Back</a>
+  <div class="card shadow-sm"><div class="card-body">
+    <h4>Drive Activity</h4>
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Date</dt><dd class="col-sm-9">{{ log.event_time or '-' }}</dd>
+      <dt class="col-sm-3">User</dt><dd class="col-sm-9">{{ log.username or 'system' }}</dd>
+      <dt class="col-sm-3">Type</dt><dd class="col-sm-9">{{ log.activity_type or '-' }}</dd>
+      <dt class="col-sm-3">IP</dt><dd class="col-sm-9">{{ log.ip_address or '-' }}</dd>
+      <dt class="col-sm-3">Device</dt><dd class="col-sm-9">{{ log.device_name or '-' }}</dd>
+      <dt class="col-sm-3">Path</dt><dd class="col-sm-9 text-break">{{ log.source_path or '-' }}</dd>
+      <dt class="col-sm-3">Share</dt><dd class="col-sm-9">{{ log.share_name or '-' }}</dd>
+    </dl>
+  </div></div>
+</div>
+{% endblock %}

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template
 from flask_login import login_required
 from sqlalchemy import func
 from datetime import datetime, timedelta
-from ..models import SynologyDevice, BackupJob, BackupHistory, Alert
+from ..models import SynologyDevice, BackupJob, BackupHistory, Alert, DriveClient, DriveLog, SyncLog
 from ..extensions import db
 
 dashboard_bp = Blueprint('dashboard', __name__)
@@ -10,7 +10,14 @@ dashboard_bp = Blueprint('dashboard', __name__)
 @dashboard_bp.route('/')
 @login_required
 def index():
-    total_devices = SynologyDevice.query.count()
+    # ===== Devices =====
+    devices = SynologyDevice.query.order_by(SynologyDevice.id).all()
+    total_devices = len(devices)
+    online_devices = SynologyDevice.query.filter_by(last_status='ONLINE').count()
+    offline_devices = SynologyDevice.query.filter_by(last_status='ERROR').count()
+    unknown_devices = total_devices - online_devices - offline_devices
+
+    # ===== Backup =====
     total_jobs = BackupJob.query.count()
 
     today = func.date(func.now())
@@ -31,29 +38,65 @@ def index():
         BackupHistory.started_at.desc()
     ).limit(10).all()
 
-    unread_alerts = Alert.query.filter_by(is_read=False).count()
+    # ===== Drive clients & logs =====
+    total_clients = DriveClient.query.count()
+    online_clients = DriveClient.query.filter_by(client_status='on_line').count()
+    offline_clients = DriveClient.query.filter_by(client_status='off_line').count()
+    syncing_clients = DriveClient.query.filter_by(client_status='syncing').count()
 
-    # Data untuk grafik 7 hari terakhir
+    total_logs = DriveLog.query.count()
+    logs_today = DriveLog.query.filter(
+        func.date(DriveLog.event_time) == today
+    ).count()
+
+    recent_logs = DriveLog.query.order_by(
+        DriveLog.event_time.desc()
+    ).limit(10).all()
+
+    recent_clients = DriveClient.query.order_by(
+        DriveClient.last_auth_time.desc()
+    ).limit(5).all()
+
+    # ===== Alerts =====
+    unread_alerts = Alert.query.filter_by(is_read=False).count()
+    recent_alerts = Alert.query.order_by(Alert.created_at.desc()).limit(5).all()
+
+    # ===== Sync logs (aktivitas sync terakhir) =====
+    recent_syncs = SyncLog.query.order_by(SyncLog.id.desc()).limit(8).all()
+
+    # ===== Data grafik backup 7 hari terakhir =====
     dates = []
     success_counts = []
     failed_counts = []
     for i in range(6, -1, -1):
         day = datetime.now().date() - timedelta(days=i)
         dates.append(day.strftime('%Y-%m-%d'))
-        success = BackupHistory.query.filter(
+        success_counts.append(BackupHistory.query.filter(
             func.date(BackupHistory.started_at) == day,
             BackupHistory.status == 'SUCCESS'
-        ).count()
-        failed = BackupHistory.query.filter(
+        ).count())
+        failed_counts.append(BackupHistory.query.filter(
             func.date(BackupHistory.started_at) == day,
             BackupHistory.status == 'FAILED'
-        ).count()
-        success_counts.append(success)
-        failed_counts.append(failed)
+        ).count())
+
+    # ===== Data grafik aktivitas Drive 7 hari terakhir =====
+    drive_dates = []
+    drive_log_counts = []
+    for i in range(6, -1, -1):
+        day = datetime.now().date() - timedelta(days=i)
+        drive_dates.append(day.strftime('%Y-%m-%d'))
+        drive_log_counts.append(DriveLog.query.filter(
+            func.date(DriveLog.event_time) == day
+        ).count())
 
     return render_template(
         'dashboard/index.html',
+        devices=devices,
         total_devices=total_devices,
+        online_devices=online_devices,
+        offline_devices=offline_devices,
+        unknown_devices=unknown_devices,
         total_jobs=total_jobs,
         backup_today=backup_today,
         failed_today=failed_today,
@@ -63,7 +106,19 @@ def index():
         warning_count=warning_count,
         recent_histories=recent_histories,
         unread_alerts=unread_alerts,
+        recent_alerts=recent_alerts,
+        total_clients=total_clients,
+        online_clients=online_clients,
+        offline_clients=offline_clients,
+        syncing_clients=syncing_clients,
+        total_logs=total_logs,
+        logs_today=logs_today,
+        recent_logs=recent_logs,
+        recent_clients=recent_clients,
+        recent_syncs=recent_syncs,
         dates=dates,
         success_counts=success_counts,
-        failed_counts=failed_counts
+        failed_counts=failed_counts,
+        drive_dates=drive_dates,
+        drive_log_counts=drive_log_counts,
     )

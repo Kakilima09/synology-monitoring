@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h3 class="mb-1">Synology Drive Monitor</h3>
+            <div class="text-muted">Client, device and activity monitoring</div>
+        </div>
+
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline-secondary align-self-center">
+            <i class="bi bi-speedometer2"></i> Dashboard Utama
+        </a>
+    </div>
+
+    {% if devices %}
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <strong>Manual Sync</strong>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+            {% for device in devices %}
+                <form method="post" action="{{ url_for('drive_dashboard.sync_now', device_id=device.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-primary">
+                        <i class="bi bi-arrow-repeat"></i> Sync {{ device.name }}
+                    </button>
+                </form>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Total Clients</div>
+                    <div class="display-6 fw-bold">{{ total_clients }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Online</div>
+                    <div class="display-6 fw-bold text-success">{{ online_clients }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Offline</div>
+                    <div class="display-6 fw-bold text-secondary">{{ offline_clients }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Syncing</div>
+                    <div class="display-6 fw-bold text-warning">{{ syncing_clients }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Drive Logs</div>
+                    <div class="display-6 fw-bold">{{ total_logs }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <strong>Recent Clients</strong>
+                    <a href="{{ url_for('drive_clients.index') }}" class="float-end">View all</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>User</th>
+                                <th>IP</th>
+                                <th>Status</th>
+                                <th>Last Auth</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for client in recent_clients %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ client.client_id }}</div>
+                                    <small class="text-muted">{{ client.client_type or '-' }}</small>
+                                </td>
+                                <td>{{ client.client_name or '-' }}</td>
+                                <td>{{ client.client_ip or '-' }}</td>
+                                <td>
+                                    {% if client.client_status == 'on_line' %}
+                                        <span class="badge bg-success">Online</span>
+                                    {% elif client.client_status == 'syncing' %}
+                                        <span class="badge bg-warning text-dark">Syncing</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ client.client_status or 'Unknown' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if client.last_seen_at %}
+                                        {{ client.last_seen_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    {% else %}-{% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">No client data</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <strong>Recent Drive Activity</strong>
+                    <a href="{{ url_for('drive_logs.index') }}" class="float-end">View all</a>
+                </div>
+                <div class="list-group list-group-flush">
+                {% for log in recent_logs %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ log.activity_type or 'Event' }}</strong>
+                            <small class="text-muted">
+                                {{ log.event_time.strftime('%Y-%m-%d %H:%M') if log.event_time else '-' }}
+                            </small>
+                        </div>
+                        <div>{{ log.username or 'system' }} · {{ log.ip_address or '-' }}</div>
+                        <small class="text-muted text-break">{{ log.source_path or log.device_name or '-' }}</small>
+                    </div>
+                {% else %}
+                    <div class="p-4 text-center text-muted">No log data</div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
