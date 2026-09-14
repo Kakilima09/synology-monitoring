@@ -1,0 +1,52 @@
+2026-09-14 10:40:34,439 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.schemas
+2026-09-14 10:40:34,439 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.tables
+2026-09-14 10:40:34,439 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.types
+2026-09-14 10:40:34,439 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.constraints
+2026-09-14 10:40:34,439 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.defaults
+2026-09-14 10:40:34,440 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.comments
+2026-09-14 10:40:34,440 INFO alembic.runtime.plugins: setup plugin alembic.ext.checkconstraint_byname
+2026-09-14 10:40:34,970 INFO app: Application started
+2026-09-14 10:40:35,002 INFO apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-09-14 10:40:35,012 INFO apscheduler.scheduler: Added job "create_app.<locals>.<lambda>" to job store "default"
+2026-09-14 10:40:35,012 INFO apscheduler.scheduler: Scheduler started
+2026-09-14 10:40:35,013 INFO app: Drive scheduler started every 5 minutes
+2026-09-14 10:40:35,020 INFO werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-09-14 10:40:35,020 INFO werkzeug: [33mPress CTRL+C to quit[0m
+2026-09-14 10:41:52,671 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:41:52] "GET / HTTP/1.1" 200 -
+2026-09-14 10:41:52,845 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:41:52] "[36mGET /static/css/custom.css HTTP/1.1[0m" 304 -
+2026-09-14 10:41:52,846 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:41:52] "[36mGET /static/js/custom.js HTTP/1.1[0m" 304 -
+2026-09-14 10:42:11,373 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:42:11] "GET / HTTP/1.1" 200 -
+2026-09-14 10:42:11,423 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:42:11] "[36mGET /static/css/custom.css HTTP/1.1[0m" 304 -
+2026-09-14 10:42:11,424 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:42:11] "[36mGET /static/js/custom.js HTTP/1.1[0m" 304 -
+2026-09-14 10:45:35,016 INFO apscheduler.executors.default: Running job "create_app.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2026-09-14 10:45:35 +07)" (scheduled at 2026-09-14 10:45:35.002413+07:00)
+2026-09-14 10:45:35,018 INFO app: Starting scheduled Synology Drive sync
+2026-09-14 10:45:35,611 INFO app.services.drive_sync_service: Drive sync START device_id=1 name=IVPSyn
+2026-09-14 10:45:35,611 INFO app.services.drive_sync_service: Login Synology dimulai untuk device_id=1
+2026-09-14 10:45:51,332 INFO app.services.drive_sync_service: Login Synology berhasil device_id=1, syno_token=available
+2026-09-14 10:45:52,048 INFO app.services.drive_sync_service: Drive clients page device_id=1 offset=0 received=50 total=147
+2026-09-14 10:45:52,307 INFO app.services.drive_sync_service: Drive clients page device_id=1 offset=50 received=50 total=147
+2026-09-14 10:45:52,436 INFO app.services.drive_sync_service: Drive clients page device_id=1 offset=100 received=47 total=147
+2026-09-14 10:45:52,488 INFO app.services.drive_sync_service: Drive logs incremental device_id=1 from=1789356126 latest=2026-09-14 10:27:06
+2026-09-14 10:45:53,027 INFO app.services.drive_sync_service: Drive LOG API device_id=1 offset=0 items=472 total=472 datefrom=1789356126
+2026-09-14 10:45:53,958 INFO app.services.drive_sync_service: Drive LOG DB COMMIT device_id=1 page=1 created=377 updated=95
+2026-09-14 10:45:53,967 INFO app.services.drive_sync_service: Drive sync SUCCESS {'success': True, 'device_id': 1, 'clients': 147, 'clients_created': 0, 'clients_updated': 147, 'logs': 472, 'logs_created': 377, 'logs_updated': 95, 'log_pages': 1, 'duration': 18.95}
+2026-09-14 10:45:54,622 INFO app: Drive sync IVPSyn: {'success': True, 'device_id': 1, 'clients': 147, 'clients_created': 0, 'clients_updated': 147, 'logs': 472, 'logs_created': 377, 'logs_updated': 95, 'log_pages': 1, 'duration': 18.95}
+2026-09-14 10:45:54,622 INFO apscheduler.executors.default: Job "create_app.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2026-09-14 10:50:35 +07)" executed successfully
+2026-09-14 10:49:11,681 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:49:11] "GET / HTTP/1.1" 200 -
+2026-09-14 10:49:11,732 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:49:11] "[36mGET /static/css/custom.css HTTP/1.1[0m" 304 -
+2026-09-14 10:49:11,734 INFO werkzeug: 127.0.0.1 - - [14/Sep/2026 10:49:11] "[36mGET /static/js/custom.js HTTP/1.1[0m" 304 -
+2026-09-14 10:50:35,022 INFO apscheduler.executors.default: Running job "create_app.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2026-09-14 10:55:35 +07)" (scheduled at 2026-09-14 10:50:35.002413+07:00)
+2026-09-14 10:50:35,025 INFO app: Starting scheduled Synology Drive sync
+2026-09-14 10:50:35,056 INFO app.services.drive_sync_service: Drive sync START device_id=1 name=IVPSyn
+2026-09-14 10:50:35,056 INFO app.services.drive_sync_service: Login Synology dimulai untuk device_id=1
+2026-09-14 10:50:47,013 INFO app.services.drive_sync_service: Login Synology berhasil device_id=1, syno_token=available
+2026-09-14 10:50:47,726 INFO app.services.drive_sync_service: Drive clients page device_id=1 offset=0 received=50 total=147
+2026-09-14 10:50:48,343 INFO app.services.drive_sync_service: Drive clients page device_id=1 offset=50 received=50 total=147
+2026-09-14 10:50:48,692 INFO app.services.drive_sync_service: Drive clients page device_id=1 offset=100 received=47 total=147
+2026-09-14 10:50:48,869 INFO app.services.drive_sync_service: Drive logs incremental device_id=1 from=1789357254 latest=2026-09-14 10:45:54
+2026-09-14 10:50:49,357 INFO app.services.drive_sync_service: Drive LOG API device_id=1 offset=0 items=166 total=166 datefrom=1789357254
+2026-09-14 10:50:49,742 INFO app.services.drive_sync_service: Drive LOG DB COMMIT device_id=1 page=1 created=76 updated=90
+2026-09-14 10:50:49,758 INFO app.services.drive_sync_service: Drive sync SUCCESS {'success': True, 'device_id': 1, 'clients': 147, 'clients_created': 0, 'clients_updated': 147, 'logs': 166, 'logs_created': 76, 'logs_updated': 90, 'log_pages': 1, 'duration': 14.71}
+2026-09-14 10:50:50,340 INFO app: Drive sync IVPSyn: {'success': True, 'device_id': 1, 'clients': 147, 'clients_created': 0, 'clients_updated': 147, 'logs': 166, 'logs_created': 76, 'logs_updated': 90, 'log_pages': 1, 'duration': 14.71}
+2026-09-14 10:50:50,341 INFO apscheduler.executors.default: Job "create_app.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2026-09-14 10:55:35 +07)" executed successfully
