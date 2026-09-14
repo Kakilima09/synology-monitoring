@@ -90,6 +90,17 @@ def index():
             func.date(DriveLog.event_time) == day
         ).count())
 
+    # ===== Sembunyikan section backup bila tidak ada datanya =====
+    has_backup_data = bool(
+        total_jobs > 0
+        or backup_today > 0
+        or success_count > 0
+        or failed_count > 0
+        or running_count > 0
+        or warning_count > 0
+        or recent_histories
+    )
+
     return render_template(
         'dashboard/index.html',
         devices=devices,
@@ -121,4 +132,5 @@ def index():
         failed_counts=failed_counts,
         drive_dates=drive_dates,
         drive_log_counts=drive_log_counts,
+        has_backup_data=has_backup_data,
     )

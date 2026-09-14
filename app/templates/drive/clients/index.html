@@ -1,79 +1,99 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="container-fluid py-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+    <div class="page-head">
         <div>
-            <h3>Synology Drive Clients</h3>
-            <div class="text-muted">Paginated local client inventory</div>
+            <h1 class="page-title"><i class="bi bi-people-fill me-2"></i>Drive Client</h1>
+            <div class="page-sub">Inventaris client yang terhubung ke Synology Drive.</div>
         </div>
     </div>
 
-    <form class="row g-2 mb-3">
-        <div class="col-md-4">
-            <input name="q" value="{{ search }}" class="form-control"
-                   placeholder="Client, user, IP...">
+    <div class="card-dash mb-3">
+        <div class="card-body p-3">
+            <form class="row g-2 align-items-end" method="get">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small mb-1">Kata Kunci</label>
+                    <input name="q" value="{{ search }}" class="form-control form-control-sm"
+                           placeholder="Client, user, IP...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small mb-1">Status</label>
+                    <input name="status" value="{{ status }}" class="form-control form-control-sm"
+                           placeholder="cth: syncing">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary btn-round btn-sm w-100"><i class="bi bi-funnel me-1"></i>Cari</button>
+                </div>
+            </form>
         </div>
-        <div class="col-md-3">
-            <input name="status" value="{{ status }}" class="form-control"
-                   placeholder="Status e.g. syncing">
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-primary">Search</button>
-        </div>
-    </form>
+    </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card-dash">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 table-dash">
                 <thead>
                 <tr>
                     <th>Client ID</th>
                     <th>User</th>
                     <th>IP</th>
                     <th>Type</th>
-                    <th>Version</th>
                     <th>Status</th>
-                    <th>Last Auth</th>
-                    <th>Action</th>
+                    <th>Auth Terakhir</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for c in clients %}
                 <tr>
-                    <td>{{ c.client_id }}</td>
-                    <td>{{ c.client_name or '-' }}</td>
-                    <td>{{ c.client_ip or '-' }}</td>
-                    <td>{{ c.client_type or '-' }}</td>
-                    <td>{{ c.client_version or '-' }}</td>
-                    <td>{{ c.client_status or '-' }}</td>
-                    <td>{{ c.last_seen_at.strftime('%Y-%m-%d %H:%M:%S') if c.last_seen_at else '-' }}</td>
                     <td>
-                        <a href="{{ url_for('drive_clients.show', id=c.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                        <div class="fw-semibold small">{{ c.client_id }}</div>
+                        <small class="text-muted">{{ c.client_version or '-' }}</small>
+                    </td>
+                    <td>{{ c.client_name or '-' }}</td>
+                    <td><small>{{ c.client_ip or '-' }}</small></td>
+                    <td><small>{{ c.client_type or '-' }}</small></td>
+                    <td>
+                        {% if c.client_status == 'on_line' %}
+                            <span class="badge-soft badge-soft-success">Online</span>
+                        {% elif c.client_status == 'syncing' %}
+                            <span class="badge-soft badge-soft-warning">Syncing</span>
+                        {% elif c.client_status == 'off_line' %}
+                            <span class="badge-soft badge-soft-secondary">Offline</span>
+                        {% else %}
+                            <span class="badge-soft badge-soft-secondary">{{ c.client_status or '-' }}</span>
+                        {% endif %}
+                    </td>
+                    <td><small>{{ c.last_seen_at.strftime('%Y-%m-%d %H:%M') if c.last_seen_at else '-' }}</small></td>
+                    <td>
+                        <a href="{{ url_for('drive_clients.show', id=c.id) }}" class="btn btn-sm btn-outline-primary btn-round">
+                            <i class="bi bi-eye"></i>
+                        </a>
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="7" class="text-center py-4 text-muted">No clients found</td></tr>
+                <tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-people d-block fs-1 mb-2 opacity-25"></i>Belum ada client ditemukan.</td></tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if pagination.pages > 1 %}
+        <div class="card-body pt-2">
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% for p in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+                        {% if p %}
+                            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('drive_clients.index', page=p, q=search, status=status) }}">{{ p }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
-
-    {% if pagination.pages > 1 %}
-    <nav class="mt-3">
-        <ul class="pagination">
-            {% for p in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
-                {% if p %}
-                    <li class="page-item {% if p == pagination.page %}active{% endif %}">
-                        <a class="page-link" href="{{ url_for('drive_clients.index', page=p, q=search, status=status) }}">{{ p }}</a>
-                    </li>
-                {% else %}
-                    <li class="page-item disabled"><span class="page-link">…</span></li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    </nav>
-    {% endif %}
 </div>
 {% endblock %}

@@ -1,6 +1,10 @@
-from flask import Blueprint, render_template, request
-from flask_login import login_required
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required, current_user
 from ..models.drive_log import DriveLog
+from ..services.drive_sync_service import (
+    auto_sync_drive_devices,
+    sync_all_drive_devices,
+)
 
 drive_logs_bp = Blueprint("drive_logs", __name__, url_prefix="/drive/logs")
 
@@ -8,6 +12,8 @@ drive_logs_bp = Blueprint("drive_logs", __name__, url_prefix="/drive/logs")
 @drive_logs_bp.route("/")
 @login_required
 def index():
+    auto_sync_drive_devices()
+
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 25, type=int), 100)
     username = request.args.get("username", "").strip()
@@ -42,6 +48,42 @@ def index():
         activity_type=activity_type,
         search=search,
     )
+
+
+@drive_logs_bp.route("/sync", methods=["POST"])
+@login_required
+def sync():
+    """Sync semua Synology Device aktif (clients + drive logs)."""
+    if not current_user.is_admin():
+        flash("Admin access required.", "danger")
+        return redirect(url_for("drive_logs.index"))
+
+    summary = sync_all_drive_devices(sync_logs=True)
+
+    total = summary.get("total", 0)
+    successful = summary.get("successful", 0)
+
+    if summary.get("skipped"):
+        flash("Drive sync dilewati: sync sebelumnya masih berjalan.", "warning")
+    elif summary.get("success"):
+        flash(
+            f"Drive sync selesai — {successful}/{total} device sukses.",
+            "success",
+        )
+    else:
+        failed = summary.get("results") or []
+        detail = "; ".join(
+            str(r.get("error", r))
+            for r in failed
+            if not r.get("success")
+        )
+        flash(
+            f"Drive sync selesai — {successful}/{total} device sukses. "
+            f"Gagal: {detail or 'Unknown error'}",
+            "danger",
+        )
+
+    return redirect(url_for("drive_logs.index"))
 
 
 @drive_logs_bp.route("/<int:id>")

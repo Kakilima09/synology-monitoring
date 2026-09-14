@@ -67,6 +67,7 @@
 
     <!-- Charts -->
     <div class="row g-3 mb-4">
+        {% if has_backup_data %}
         <div class="col-lg-7">
             <div class="card-dash h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -84,6 +85,9 @@
             </div>
         </div>
         <div class="col-lg-5">
+        {% else %}
+        <div class="col-lg-12">
+        {% endif %}
             <div class="card-dash h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Aktivitas Drive (7 Hari)</span>
@@ -163,6 +167,7 @@
 
     <!-- Recent backups + drive activity -->
     <div class="row g-3 mb-4">
+        {% if has_backup_data %}
         <div class="col-lg-7">
             <div class="card-dash">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -192,6 +197,9 @@
             </div>
         </div>
         <div class="col-lg-5">
+        {% else %}
+        <div class="col-lg-12">
+        {% endif %}
             <div class="card-dash">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-activity me-2 text-primary"></i>Aktivitas Drive Terbaru</span>
@@ -294,11 +302,10 @@
 
 {% block scripts %}
 <script>
+{% if has_backup_data %}
 const backupDates = {{ dates | tojson }};
 const backupSuccess = {{ success_counts | tojson }};
 const backupFailed = {{ failed_counts | tojson }};
-const driveDates = {{ drive_dates | tojson }};
-const driveLogs = {{ drive_log_counts | tojson }};
 
 new Chart(document.getElementById('backupChart'), {
     type: 'bar',
@@ -316,6 +323,10 @@ new Chart(document.getElementById('backupChart'), {
         scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(148,163,184,.15)' } }, x: { grid: { display: false } } }
     }
 });
+{% endif %}
+
+const driveDates = {{ drive_dates | tojson }};
+const driveLogs = {{ drive_log_counts | tojson }};
 
 new Chart(document.getElementById('driveChart'), {
     type: 'line',

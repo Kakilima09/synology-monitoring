@@ -36,6 +36,9 @@
                 <a class="nav-item {% if request.endpoint and request.endpoint.startswith('drive_logs') %}active{% endif %}" href="{{ url_for('drive_logs.index') }}">
                     <i class="bi bi-journal-text"></i><span>Log Drive</span>
                 </a>
+                <a class="nav-item {% if request.endpoint and request.endpoint.startswith('drive_clients') %}active{% endif %}" href="{{ url_for('drive_clients.index') }}">
+                    <i class="bi bi-people-fill"></i><span>Drive Client</span>
+                </a>
                 <a class="nav-item {% if request.endpoint and request.endpoint.startswith('export_logs') %}active{% endif %}" href="{{ url_for('export_logs.index') }}">
                     <i class="bi bi-download"></i><span>Ekspor Log</span>
                 </a>
@@ -81,6 +84,9 @@
                     </a>
                     <a class="nav-item {% if request.endpoint and request.endpoint.startswith('drive_logs') %}active{% endif %}" href="{{ url_for('drive_logs.index') }}">
                         <i class="bi bi-journal-text"></i><span>Log Drive</span>
+                    </a>
+                    <a class="nav-item {% if request.endpoint and request.endpoint.startswith('drive_clients') %}active{% endif %}" href="{{ url_for('drive_clients.index') }}">
+                        <i class="bi bi-people-fill"></i><span>Drive Client</span>
                     </a>
                     <a class="nav-item {% if request.endpoint and request.endpoint.startswith('export_logs') %}active{% endif %}" href="{{ url_for('export_logs.index') }}">
                         <i class="bi bi-download"></i><span>Ekspor Log</span>

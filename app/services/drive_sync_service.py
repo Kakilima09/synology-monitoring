@@ -29,6 +29,14 @@ logger = logging.getLogger(__name__)
 #
 _SYNC_LOCK = threading.Lock()
 
+# State untuk auto-sync saat halaman Log Drive / Drive Client
+# di-refresh. Background thread + throttle mencegah sync berjalan
+# terus-menerus hanya karena halaman dimuat ulang.
+_AUTO_SYNC_STATE = {
+    "lock": threading.Lock(),
+    "last_started": 0.0,
+}
+
 
 # ============================================================
 # CUSTOM EXCEPTION
@@ -1414,3 +1422,73 @@ def sync_all_drive_devices(
     finally:
 
         _SYNC_LOCK.release()
+
+
+# ============================================================
+# AUTO SYNC ON PAGE REFRESH
+# ============================================================
+
+def auto_sync_drive_devices(sync_logs=True):
+    """
+    Trigger Drive sync di background ketika halaman Log Drive
+    atau Drive Client di-refresh.
+
+    Sync dijalankan pada thread daemon terpisah sehingga render
+    halaman tidak diblokir. Throttle mencegah sync berulang saat
+    filter/pagination diklik dalam interval singkat. Lock global
+    pada sync_all_drive_devices mencegah overlap dengan scheduler.
+    """
+
+    try:
+        app = current_app._get_current_object()
+    except RuntimeError:
+        return False
+
+    if app.config.get("TESTING"):
+        logger.debug("Auto sync dilewati: mode TESTING aktif.")
+        return False
+
+    if not app.config.get("AUTO_SYNC_ON_VIEW", True):
+        return False
+
+    try:
+        min_interval = int(
+            app.config.get("AUTO_SYNC_MIN_INTERVAL_SECONDS", 60)
+        )
+    except (TypeError, ValueError):
+        min_interval = 60
+
+    with _AUTO_SYNC_STATE["lock"]:
+        now = time.time()
+
+        if now - _AUTO_SYNC_STATE["last_started"] < min_interval:
+            logger.debug(
+                "Auto sync dilewati: interval throttle %.0fs belum lewat.",
+                min_interval,
+            )
+            return False
+
+        _AUTO_SYNC_STATE["last_started"] = now
+
+    logger.info(
+        "Auto sync Drive di-refresh:halaman. "
+        "Sync dijalankan di background."
+    )
+
+    def _run():
+        try:
+            with app.app_context():
+                sync_all_drive_devices(sync_logs=sync_logs)
+        except Exception:
+            logger.exception(
+                "Auto sync background Drive gagal."
+            )
+
+    thread = threading.Thread(
+        target=_run,
+        name="drive-auto-sync",
+        daemon=True,
+    )
+    thread.start()
+
+    return True

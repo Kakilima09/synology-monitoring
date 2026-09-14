@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, abort
 from flask_login import login_required
 from ..models.drive_client import DriveClient
+from ..services.drive_sync_service import auto_sync_drive_devices
 
 drive_clients_bp = Blueprint("drive_clients", __name__, url_prefix="/drive/clients")
 
@@ -8,6 +9,8 @@ drive_clients_bp = Blueprint("drive_clients", __name__, url_prefix="/drive/clien
 @drive_clients_bp.route("/")
 @login_required
 def index():
+    auto_sync_drive_devices()
+
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 25, type=int), 100)
     status = request.args.get("status", "").strip()

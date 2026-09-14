@@ -9,6 +9,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
     SYNC_INTERVAL_MINUTES = int(os.environ.get('SYNC_INTERVAL_MINUTES', 5))
+    AUTO_SYNC_ON_VIEW = os.environ.get('AUTO_SYNC_ON_VIEW', 'true').strip().lower() in ('1', 'true', 'yes', 'on')
+    AUTO_SYNC_MIN_INTERVAL_SECONDS = int(os.environ.get('AUTO_SYNC_MIN_INTERVAL_SECONDS', 60))
     SYNOLOGY_API_TIMEOUT = int(os.environ.get('SYNOLOGY_API_TIMEOUT', 30))
     WTF_CSRF_ENABLED = True
     SYNOLOGY_API_TIMEOUT = int(
