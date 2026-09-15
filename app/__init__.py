@@ -58,8 +58,10 @@ def create_app(config_class=Config):
     # ====== CLI COMMANDS ======
     from .commands.sync_backup import sync_backup_command
     from .commands.sync_drive import sync_drive_command
+    from .commands.seed_admin import seed_admin_command
     app.cli.add_command(sync_backup_command)
     app.cli.add_command(sync_drive_command)
+    app.cli.add_command(seed_admin_command)
 
     # ====== SCHEDULER ======
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
