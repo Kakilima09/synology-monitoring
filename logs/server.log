@@ -50,3 +50,140 @@
 2026-09-14 10:50:49,758 INFO app.services.drive_sync_service: Drive sync SUCCESS {'success': True, 'device_id': 1, 'clients': 147, 'clients_created': 0, 'clients_updated': 147, 'logs': 166, 'logs_created': 76, 'logs_updated': 90, 'log_pages': 1, 'duration': 14.71}
 2026-09-14 10:50:50,340 INFO app: Drive sync IVPSyn: {'success': True, 'device_id': 1, 'clients': 147, 'clients_created': 0, 'clients_updated': 147, 'logs': 166, 'logs_created': 76, 'logs_updated': 90, 'log_pages': 1, 'duration': 14.71}
 2026-09-14 10:50:50,341 INFO apscheduler.executors.default: Job "create_app.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2026-09-14 10:55:35 +07)" executed successfully
+2026-09-15 10:16:46,035 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.schemas
+2026-09-15 10:16:46,036 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.tables
+2026-09-15 10:16:46,037 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.types
+2026-09-15 10:16:46,037 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.constraints
+2026-09-15 10:16:46,037 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.defaults
+2026-09-15 10:16:46,037 INFO alembic.runtime.plugins: setup plugin alembic.autogenerate.comments
+2026-09-15 10:16:46,037 INFO alembic.runtime.plugins: setup plugin alembic.ext.checkconstraint_byname
+2026-09-15 10:16:47,503 INFO app: Application started
+2026-09-15 10:16:47,608 INFO apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-09-15 10:16:47,610 INFO apscheduler.scheduler: Added job "create_app.<locals>.<lambda>" to job store "default"
+2026-09-15 10:16:47,611 INFO apscheduler.scheduler: Scheduler started
+2026-09-15 10:16:47,657 INFO app: Drive scheduler started every 5 minutes
+2026-09-15 10:16:47,694 INFO werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-09-15 10:16:47,694 INFO werkzeug: [33mPress CTRL+C to quit[0m
+2026-09-15 10:16:55,910 INFO werkzeug: 127.0.0.1 - - [15/Sep/2026 10:16:55] "[32mGET / HTTP/1.1[0m" 302 -
+2026-09-15 10:16:56,090 INFO werkzeug: 127.0.0.1 - - [15/Sep/2026 10:16:56] "GET /auth/login?next=/ HTTP/1.1" 200 -
+2026-09-15 10:16:56,739 INFO werkzeug: 127.0.0.1 - - [15/Sep/2026 10:16:56] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-09-15 10:17:02,817 ERROR app: Exception on /auth/login [POST]
+Traceback (most recent call last):
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: users
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\synology-backup-monitor\app\routes\auth.py", line 16, in login
+    user = User.query.filter_by(username=form.username.data).first()
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+        params,
+        ^^^^^^^
+        execution_options={"_sa_orm_load_options": self.load_options},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2373, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1421, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\synology-backup-monitor\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.password_hash AS users_password_hash, users.role AS users_role, users.is_active AS users_is_active, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.username = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('admin', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-09-15 10:17:03,034 INFO werkzeug: 127.0.0.1 - - [15/Sep/2026 10:17:03] "[35m[1mPOST /auth/login?next=/ HTTP/1.1[0m" 500 -
